@@ -1,6 +1,7 @@
 import can
 import csv
 import pandas as pd
+from .Pid import Pid
 
 def ler_pids(arquivo: str):
     df = pd.read_csv(arquivo)
@@ -16,7 +17,7 @@ def ler_pids(arquivo: str):
             scale=linha["scale"],
             offset=linha["offset"],
             unit=linha["unit"],
-        )
+        )  #NOTE está inicializando a classe Pid errado
         pids[linha["name"]] = pid #dicionario e a chave é o name
 
     return pids;

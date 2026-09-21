@@ -2,14 +2,14 @@ import time
 import can
 
 class Pid:
-    def __init__(self, code, name, formula):
+    def __init__(self, code, name, formula): # está passando muito pouco argumentos vai dar erro
         self.code = code
-        self.name = nome
-        self.num_bytes = num_bytes
-        self.scale = scale
-        self.offset = offset
-        self.unit = unit
-        self.periodo_ms
+        self.name = name
+        self.num_bytes = num_bytes #NOTE de onde vem esses valores?
+        self.scale = scale  # de onde vem esses valores?
+        self.offset = offset # de onde vem esses valores?
+        self.unit = unit # de onde vem esses valores?
+        self.periodo_ms # oque é esse valor?
         self.listaIds = [0x7E8, 0x7E9, 0x7EA, 0x7EB, 0x7EC, 0x7ED, 0x7EE, 0x7EF] #lista de IDs de possiveis respostas ao OBD2, variam conforme a ECU
 
 
@@ -20,7 +20,7 @@ class Pid:
 
     #monta e devolve a mensagem do pedido
     def build_request(self):
-        msg = can.Message(arbitration_id=0x7DF, data=[0x02, 0x01, code, 0x00, 0x00, 0x00, 0x00, 0x00], is_extended_id=False)
+        msg = can.Message(arbitration_id=0x7DF, data=[0x02, 0x01, self.code, 0x00, 0x00, 0x00, 0x00, 0x00], is_extended_id=False)
         return msg
 
     #verifica primeiro se é uma resposta ao obd2(pelo ID) e 
