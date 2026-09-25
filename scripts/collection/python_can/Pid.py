@@ -11,7 +11,7 @@ decodificar a resposta que o carro devolve, sem que o resto do código
 """
 
 class Pid:
-    def __init__(self, code, name, num_bytes, scale, offset, unit, periodo_ms, formula): # está passando muito pouco argumentos vai dar erro
+    def __init__(self, code, name, num_bytes, scale, offset, unit, periodo_ms): # está passando muito pouco argumentos vai dar erro
         self.code = code # código do PID em hexadecimal
         self.name = name
         self.num_bytes = num_bytes #quantos bytes de dado a resposta desse PID traz
@@ -34,26 +34,26 @@ class Pid:
         return valor*self.scale + self.offset 
 
     def build_request(self):
-         """
+        '''
         Monta e devolve o frame de pedido do OBD2 (modo 01 = "leitura de
         dado atual") pra este PID específico. 
         Formato do pedido (sempre 8 bytes, sempre pro ID 0x7DF = broadcast):
-            byte 0: 0x02  -> avisa que só os 2 próximos bytes são úteis
-            byte 1: 0x01  -> modo 01 (leitura de dado atual)
-            byte 2: code  -> o PID que estamos pedindo
-            bytes 3-7: 0x00 (padding, sem uso)
-        """
+        byte 0: 0x02  -> avisa que só os 2 próximos bytes são úteis
+        byte 1: 0x01  -> modo 01 (leitura de dado atual)
+        byte 2: code  -> o PID que estamos pedindo
+        bytes 3-7: 0x00 (padding, sem uso)
+        '''
         msg = can.Message(arbitration_id=0x7DF, data=[0x02, 0x01, self.code, 0x00, 0x00, 0x00, 0x00, 0x00], is_extended_id=False)
         return msg
 
     #verifica primeiro se é uma resposta ao obd2(pelo ID) e 
     #se é do PID certo, aí pega os dados
     def decode_response(self, msg:Message):
-         """
+        '''
         Confere se msg é uma resposta válida a este PID, e se for, devolve
         o valor já decodificado (float). Devolve None em qualquer caso de
         falha
-        """
+        '''
         resposta = False
 
         #mensagens com menos de 3 bytes : inválidas, só ruído

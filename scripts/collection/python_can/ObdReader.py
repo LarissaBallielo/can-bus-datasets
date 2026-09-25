@@ -45,10 +45,10 @@ class ObdReader :
         if dado is not None: funcao(dado, mensagem.timestamp)
 
     def start(self):
-         '''
-         Começa a reenviar o pedido de cada PID sozinho, cada um na sua frequência
-         lẽ primeiro a pressão barométrica, uma vez apenas
-          Guarda cada "tarefa" que send_periodic() devolve em self._tasks,
+        '''
+        Começa a reenviar o pedido de cada PID sozinho, cada um na sua frequência
+        le primeiro a pressão barométrica, uma vez apenas
+        Guarda cada "tarefa" que send_periodic() devolve em self._tasks,
         pra poder desligar todas elas depois, em stop().
         '''
         self.read_pid_only(self.pids["baro"])
@@ -56,7 +56,7 @@ class ObdReader :
         for pid in self.pids.values():
             if pid.name == "baro": continue # pula o barometro q ja foi lido
             msg = pid.build_request()
-            periodo_segundos = pid.period_ms / 1000
+            periodo_segundos = pid.periodo_ms / 1000
             task = self.bus.send_periodic(msg, periodo_segundos)
             self._tasks.append(task)
 
