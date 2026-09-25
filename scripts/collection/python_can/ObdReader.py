@@ -1,6 +1,6 @@
 import time 
 import can
-from pid import Pid
+from Pid import Pid
 
 """
 ObdReader: orquestra a leitura dos PIDs do OBD2, usando um bus (conexão
