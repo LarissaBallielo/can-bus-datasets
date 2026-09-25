@@ -3,16 +3,17 @@
 #TODO colocar referencias de funções
 
 import can
-from .formulasDados import ler_pids
+from formulasDados import ler_pids
+from ObdReader import ObdReader
 
 def main():
-    pids = criar_csv("pids.csv") #NOTE oque faz essa função? 
+    pids = ler_pids("pid.csv") #NOTE oque faz essa função? 
                                  #NOTE era para ser ler_pids de formula dados?
  
     with can.Bus(channel="can0", interface="socketcan") as bus:
         reader = ObdReader(bus, pids) 
         try:
-            read_all() # essa função não está sendo chamada
+            reader.read_all() # essa função não está sendo chamada
         except KeyboardInterrupt:
             print("Encerrado.")
  
