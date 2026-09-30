@@ -53,8 +53,9 @@ class DataCollect:
         if pid.name not in self.pids:
             return
 
-
         self.MSG_BUFFER[pid.name] = valor
+
+        print(f"RECEBIDO: {pid.name} = {valor} | buffer: {len(self.PIDS_RECEIVED)} / {len(self.pids)}")
 
         # Marca esse PID como recebido para a amostra atual.
         self.PIDS_RECEIVED.add(pid.name)
@@ -81,6 +82,7 @@ class DataCollect:
         with open(self.nome, "a", newline="") as arquivo:
             writer = csv.writer(arquivo)
             writer.writerow(linha)
+            print(f"LINHA adicionada: {linha}")
 
         self.MSG_BUFFER.clear()
         self.PIDS_RECEIVED.clear()
