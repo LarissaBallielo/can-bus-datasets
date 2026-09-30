@@ -7,13 +7,12 @@ from formulasDados import ler_pids
 from ObdReader import ObdReader
 
 def main():
-    pids = ler_pids("pid.csv") #NOTE oque faz essa função? 
-                                 #NOTE era para ser ler_pids de formula dados?
+    pids = ler_pids("pid.csv")  
  
     with can.Bus(channel="can0", interface="socketcan") as bus:
         reader = ObdReader(bus, pids) 
         try:
-            reader.read_all() # essa função não está sendo chamada
+            reader.read_all() 
         except KeyboardInterrupt:
             print("Encerrado.")
  
