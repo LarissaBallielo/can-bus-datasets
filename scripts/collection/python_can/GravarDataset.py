@@ -39,6 +39,8 @@ class DataCollect:
 
         self.time_inicio = time.time()
 
+        self.timeout_aquecimento = 2.0 #segundos
+
     def criar_CSV(self) -> None:
 
         novo = not os.path.exists(self.nome)
@@ -113,10 +115,17 @@ class DataCollect:
         """
         faltando = set(self.pids.keys()) - self.PIDS_RECEIVED
         if faltando:
-            print(f"Aquecendo... ainda faltam: {faltando}")
-            return False
-        if self.PIDS_RECEIVED != set(self.pids.keys()):
-            return False
+            tempo_passado = time.time() - self.time_inicio
+            if tempo_passado < self.timeout_aquecimento:
+                print(f"Aquecendo... ainda faltam: {faltando}")
+                return False
+                
+        for nome in faltando:
+                self.MSG_BUFFER[nome] = 0
+            print(f"Timeout de {self.timeout_aquecimento}s: assumindo 0 pra {faltando}")
+
+        #if self.PIDS_RECEIVED != set(self.pids.keys()):
+        #    return False
 
         self.gravar_linha()
 
