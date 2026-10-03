@@ -1,6 +1,6 @@
 import csv
 import os
-
+import time
 
 class DataCollect:
 
@@ -37,6 +37,8 @@ class DataCollect:
 
         self.pronto = False #ja coletou a primeira linha? 1x cada dado?
 
+        self.time_inicio = time.time()
+
     def criar_CSV(self) -> None:
 
         novo = not os.path.exists(self.nome)
@@ -65,14 +67,14 @@ class DataCollect:
         # Marca esse PID como recebido para a amostra atual.
         self.PIDS_RECEIVED.add(pid.name)
 
-        self.TIMESTAMP = timestamp
+        self.TIMESTAMP = round((timestamp - self.time_inicio) * 1000) #tempo em ms
 
-        if(not self.pronto): self._BUFFER_CHECK()
         '''
         Ao inves de chamar o buffer check toda vaz, que grava o timestamp com base na resposta mais demorada, chama ele apenas na primeira vez
         pra ter um valor de cada PID
 
         '''
+        if(not self.pronto): self._BUFFER_CHECK()
         else: self.gravar_dados(pid, valor, timestamp)
 
     def gravar_linha(self):
@@ -95,14 +97,13 @@ class DataCollect:
         '''
         
         self.MSG_BUFFER[pid.name] = valor   # sempre atualiza, igual já fazia
-        self.TIMESTAMP = timestamp
 
         if pid.name in self.pids_ancora:
             self.recebidos_ancora.add(pid.name)
 
         if self.recebidos_ancora == self.pids_ancora:
-        self.gravar_linha()
-        self.recebidos_ancora.clear()   # só limpa ESSE conjunto, não o MSG_BUFFER
+            self.gravar_linha()
+            self.recebidos_ancora.clear()   # só limpa ESSE conjunto, não o MSG_BUFFER
 
 
         
@@ -119,6 +120,6 @@ class DataCollect:
         # self.MSG_BUFFER.clear() não precisa limpar pois quando chegar um valor novo será sobrescrito
         # self.PIDS_RECEIVED.clear() nao vai usar dnv
         # self.TIMESTAMP = None nao precisa limpar pq vai ser sobrescrito
-
+        self.pronto = True
         return True
 

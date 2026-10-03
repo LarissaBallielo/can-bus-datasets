@@ -7,18 +7,18 @@ from GravarDataset import DataCollect
 
 def main():
 
-    # Carrega os PIDs do pid.csv
+    # Carrega os PIDs do pid.csv em um dicionario
     pids = ler_pids("pid.csv")
     pids_ancora = set()
 
     #vê os PIDs que tem o periodo de 50ms e põe na lista pids_ancora
-    for pid in pids:
-        if(pid.periodo_ms == 50)
-        pids_ancora.append(pid)
+    for pid in pids.values():
+        if(pid.periodo_ms == 50):
+            pids_ancora.add(pid.name)
 
     # Cria o objeto responsável pelo CSV
     coletor = DataCollect(
-        "dataset.csv",
+        "/home/pi/can-bus-datasets/data/dataset.csv"dataset.csv",
         pids,
         pids_ancora
     )
