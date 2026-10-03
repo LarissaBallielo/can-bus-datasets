@@ -111,7 +111,10 @@ class DataCollect:
         """
         essa função vai checar o buffer de mensagem e ver se ele já está completo
         """
-
+        faltando = set(self.pids.keys()) - self.PIDS_RECEIVED
+        if faltando:
+            print(f"Aquecendo... ainda faltam: {faltando}")
+            return False
         if self.PIDS_RECEIVED != set(self.pids.keys()):
             return False
 
