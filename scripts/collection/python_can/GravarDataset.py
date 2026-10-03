@@ -4,7 +4,7 @@ import os
 
 class DataCollect:
 
-    def __init__(self, nome, pids):
+    def __init__(self, nome, pids, pids_ancora):
         """
         nome:
             Nome do arquivo CSV.
@@ -32,6 +32,11 @@ class DataCollect:
         #Set que guarda quais valores já foram recebidos
         self.PIDS_RECEIVED = set()
 
+        self.pids_ancora = set(pids_ancora) #pids que vai de 50 em 50ms
+        self.recebidos_ancora = set()
+
+        self.pronto = False #ja coletou a primeira linha? 1x cada dado?
+
     def criar_CSV(self) -> None:
 
         novo = not os.path.exists(self.nome)
@@ -41,7 +46,7 @@ class DataCollect:
 
             if novo:
                 writer.writerow(
-                    list(self.pids.keys()) + ["timestamp"]
+                    list(self.pids.keys()) + ["timestamp"] #escreve o cabeçalho se for novo
                 )
 
     def receber_dado(self, pid, valor, timestamp) -> None:
@@ -62,16 +67,15 @@ class DataCollect:
 
         self.TIMESTAMP = timestamp
 
-        self._BUFFER_CHECK()
+        if(not self.pronto): self._BUFFER_CHECK()
+        '''
+        Ao inves de chamar o buffer check toda vaz, que grava o timestamp com base na resposta mais demorada, chama ele apenas na primeira vez
+        pra ter um valor de cada PID
 
-    def _BUFFER_CHECK(self) -> bool:
-        """
-        essa função vai checar o buffer de mensagem e ver se ele já está completo
-        """
+        '''
+        else: self.gravar_dados(pid, valor, timestamp)
 
-        if self.PIDS_RECEIVED != set(self.pids.keys()):
-            return False
-
+    def gravar_linha(self):
         linha = []
 
         for nome in self.pids.keys():
@@ -84,9 +88,37 @@ class DataCollect:
             writer.writerow(linha)
             print(f"LINHA adicionada: {linha}")
 
-        self.MSG_BUFFER.clear()
-        self.PIDS_RECEIVED.clear()
-        self.TIMESTAMP = None
+
+    def gravar_dados(self, pid, valor, timestamp):
+        '''
+        toda vez q recebo um dado, escrevo ele no buffer, mas antes de gravar uma linha, espera os dados que são de 50 em 50ms pra gravar
+        '''
+        
+        self.MSG_BUFFER[pid.name] = valor   # sempre atualiza, igual já fazia
+        self.TIMESTAMP = timestamp
+
+        if pid.name in self.pids_ancora:
+            self.recebidos_ancora.add(pid.name)
+
+        if self.recebidos_ancora == self.pids_ancora:
+        self.gravar_linha()
+        self.recebidos_ancora.clear()   # só limpa ESSE conjunto, não o MSG_BUFFER
+
+
+        
+    def _BUFFER_CHECK(self) -> bool:
+        """
+        essa função vai checar o buffer de mensagem e ver se ele já está completo
+        """
+
+        if self.PIDS_RECEIVED != set(self.pids.keys()):
+            return False
+
+        self.gravar_linha()
+
+        # self.MSG_BUFFER.clear() não precisa limpar pois quando chegar um valor novo será sobrescrito
+        # self.PIDS_RECEIVED.clear() nao vai usar dnv
+        # self.TIMESTAMP = None nao precisa limpar pq vai ser sobrescrito
 
         return True
 

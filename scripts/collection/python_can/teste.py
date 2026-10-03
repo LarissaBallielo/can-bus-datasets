@@ -15,7 +15,7 @@ PIDS_PARA_TESTAR = ["rpm", "velocidade", "maf"]
 def main():
     pids = ler_pids("pid.csv")
 
-    with can.Bus(channel=CHANNEL, interface="socketcan") as bus:
+    with can.Bus(channel=CHANNEL, interface="socketcan", bitrate = 500000) as bus:
         print("Testando 3 PIDsn")
 
         for nome in PIDS_PARA_TESTAR:
