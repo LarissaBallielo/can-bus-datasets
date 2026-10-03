@@ -18,7 +18,7 @@ def main():
 
     # Cria o objeto responsável pelo CSV
     coletor = DataCollect(
-        "/home/canlab/can-bus-datasets/data/dataset.csv"dataset.csv",
+        "/home/canlab/can-bus-datasets/data/dataset.csv",
         pids,
         pids_ancora
     )
