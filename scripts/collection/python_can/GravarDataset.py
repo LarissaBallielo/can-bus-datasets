@@ -122,7 +122,7 @@ class DataCollect:
                 
         for nome in faltando:
                 self.MSG_BUFFER[nome] = 0
-            print(f"Timeout de {self.timeout_aquecimento}s: assumindo 0 pra {faltando}")
+        print(f"Timeout de {self.timeout_aquecimento}s: assumindo 0 pra {faltando}")
 
         #if self.PIDS_RECEIVED != set(self.pids.keys()):
         #    return False
