@@ -76,5 +76,5 @@ class Pid:
 
         if recebidos != self.num_bytes:      # tamanho inesperado: descarta
         return None
-        return self.formula(msg.data[3:3 +self.num_bytes)
+        return self.formula(msg.data[3:3 +self.num_bytes])
 
