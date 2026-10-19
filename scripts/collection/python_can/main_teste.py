@@ -38,7 +38,7 @@ def main():
 
         except KeyboardInterrupt:
             print("Encerrado.")
-
+            print("Nunca responderam:", set(coletor.pids) - coletor.PIDS_RECEIVED)
 
 if __name__ == "__main__":
     main()

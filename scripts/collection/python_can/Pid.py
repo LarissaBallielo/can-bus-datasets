@@ -72,5 +72,9 @@ class Pid:
         if msg.data[2] != self.code:
             return None
 
-        return self.formula(msg.data[3:])
+        recebidos = msg.data[0] - 2          # bytes de dado que a ECU mandou
+
+        if recebidos != self.num_bytes:      # tamanho inesperado: descarta
+        return None
+        return self.formula(msg.data[3:3 +self.num_bytes)
 
