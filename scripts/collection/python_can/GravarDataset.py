@@ -40,6 +40,7 @@ class DataCollect:
         self.time_inicio = time.time()
 
         self.timeout_aquecimento = 2.0 #segundos
+        self.motor_ligado = False
 
     def criar_CSV(self) -> None:
 
@@ -68,6 +69,13 @@ class DataCollect:
 
         # Marca esse PID como recebido para a amostra atual.
         self.PIDS_RECEIVED.add(pid.name)
+
+        if not self.motor_ligado:
+            if pid.name == "rpm" and valor >= 500:
+                self.motor_ligado = True
+                self.time_inicio = timestamp   # zero = instante da partida
+            else:
+                return
 
         self.TIMESTAMP = round((timestamp - self.time_inicio) * 1000) #tempo em ms
 
@@ -126,6 +134,12 @@ class DataCollect:
 
         #if self.PIDS_RECEIVED != set(self.pids.keys()):
         #    return False
+
+        ancoras_ok = self.pids_ancora & self.PIDS_RECEIVED
+        if ancoras_ok != self.pids_ancora:
+            print("Âncoras sem resposta, removidas:", self.pids_ancora - ancoras_ok)
+        self.pids_ancora = ancoras_ok or set(self.PIDS_RECEIVED)
+        self.recebidos_ancora.clear()
 
         self.gravar_linha()
 
