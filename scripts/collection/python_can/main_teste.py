@@ -26,6 +26,8 @@ def main():
     # Cria o arquivo e o cabeçalho caso necessário
     coletor.criar_CSV()
 
+
+    #can0 para mcp2515 e can1 para canable
     with can.Bus( channel="can0", interface="socketcan" ) as bus:
 
         reader = ObdReader(bus,pids)
