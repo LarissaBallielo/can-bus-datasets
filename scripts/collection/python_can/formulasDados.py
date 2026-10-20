@@ -35,8 +35,8 @@ def ler_pids(arquivo: str):
             scale=linha["scale"],
             offset=linha["offset"],
             unit=linha["unit"],
-            periodo_ms = linha["periodo_ms"]
-            byte_inicio = linha["byte_inicio"]
+            periodo_ms = linha["periodo_ms"],
+            byte_inicio = linha["byte_inicio"],
             valor_invalido = linha["valor_invalido"]
         )  
          # Guarda no dicionário final, usando o nome como chave, pra poder chamar pids["rpm"] por exemplo

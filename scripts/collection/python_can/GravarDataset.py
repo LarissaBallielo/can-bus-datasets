@@ -81,7 +81,7 @@ class DataCollect:
     def _estado_motor(self, rpm, timestamp):
 
         if not self.ligado:
-            if rpm >= self.500:      # motor pegou: tempo zera
+            if rpm >= 500:      # motor pegou: tempo zera
                 self.ligado = True
                 self.sessao += 1
                 self.t0 = timestamp
@@ -96,7 +96,7 @@ class DataCollect:
                 print("Motor desligado.")
         else:
             self.parado_desde = None  
-              
+
     def receber_dado(self, pid, valor, timestamp) -> None:
         """
         essencialmente a função callback de obdReader que recebe dados lidos por ela
