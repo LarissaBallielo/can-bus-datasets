@@ -11,7 +11,7 @@ decodificar a resposta que o carro devolve, sem que o resto do código
 """
 
 class Pid:
-    def __init__(self, code, name, num_bytes, scale, offset, unit, periodo_ms): # está passando muito pouco argumentos vai dar erro
+    def __init__(self, code, name, num_bytes, scale, offset, unit, periodo_ms, byte_inicio, valor_invalido): # está passando muito pouco argumentos vai dar erro
         self.code = code # código do PID em hexadecimal
         self.name = name
         self.num_bytes = num_bytes #quantos bytes de dado a resposta desse PID traz
@@ -19,6 +19,8 @@ class Pid:
         self.offset = offset # valor somado depois da escala
         self.unit = unit # unidade(km/h, s, rpm..)
         self.periodo_ms = periodo_ms # tempo em milissegundos o qual esse PID deve ser solicitado de novo (frequencia)
+        self.byte_inicio = byte_inicio
+        self.valor_invalido = valor_invalido
         self.listaIds = [0x7E8, 0x7E9, 0x7EA, 0x7EB, 0x7EC, 0x7ED, 0x7EE, 0x7EF] #lista de IDs de possiveis respostas ao OBD2, variam conforme a ECU
 
     
@@ -74,8 +76,9 @@ class Pid:
 
         recebidos = msg.data[0] - 2          # bytes de dado que a ECU mandou
 
-        if recebidos != self.num_bytes:      # tamanho inesperado: descarta
+        if recebidos < self.byte_inicio + self.num_bytes:      # tamanho inesperado: descarta
             return None
-            
-        return self.formula(msg.data[3:3 +self.num_bytes])
+        
+        inicio = 3 + self.byte_inicio
+        return self.formula(msg.data[inicio:inicio +self.num_bytes])
 
