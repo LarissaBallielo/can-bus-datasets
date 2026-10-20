@@ -58,7 +58,7 @@ class DataCollect:
 
             if novo:
                 writer.writerow(
-                    list(self.pids.keys()) + ["timestamp"] #escreve o cabeçalho se for novo
++                     ["t_ms", "pid", "valor", "sessao"] #cabeçalho do formato longo
                 )
 
     def record_reading(self, pid, valor, timestamp) -> None:
@@ -67,7 +67,12 @@ class DataCollect:
             return
         self.PIDS_RECEIVED.add(pid.name)
 
+        if self.ligado and timestamp - self.ultimo_rpm >= 3.0:
+            self.ligado = False
+            print("Motor desligado (sem resposta de RPM).")
+     
         if pid.name == "rpm":
+            self.ultimo_rpm = timestamp
             self._estado_motor(valor, timestamp)
 
         if not self.ligado:

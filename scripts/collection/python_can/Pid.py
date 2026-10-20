@@ -59,7 +59,7 @@ class Pid:
         resposta = False
 
         #mensagens com menos de 3 bytes : inválidas, só ruído
-        if len(msg.data) < 3 + self.num_bytes: return None
+        if len(msg.data) < 3 + self.byte_inicio + self.num_bytes: return None
 
         #confirma que a mensagem veio de um dos IDs de resposta do OBD2
         for id in self.listaIds :
@@ -79,6 +79,7 @@ class Pid:
         if recebidos < self.byte_inicio + self.num_bytes:      # tamanho inesperado: descarta
             return None
         
-        inicio = 3 + self.byte_inicio
-        return self.formula(msg.data[inicio:inicio +self.num_bytes])
+       dados = msg.data[inicio:inicio +self.num_bytes]
+       if int.from_bytes(dados, "big") == self.valor_invalido: return None  # NaN nunca é igual
+       return self.formula(dados)
 

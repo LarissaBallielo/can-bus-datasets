@@ -42,7 +42,7 @@ class ObdReader :
             if mensagem is None: continue
             dado = pid.decode_response(mensagem)  # se dado continuar None aqui, era resposta de outra coisa
         
-        if dado is not None: funcao(dado, mensagem.timestamp)
+        if dado is not None: funcao(pid, dado, mensagem.timestamp)
 
     def start(self):
         '''
@@ -52,7 +52,7 @@ class ObdReader :
         pra poder desligar todas elas depois, em stop().
         '''
         self.read_pid_only(self.pids["baro"])
-
+        sent_any = False                # zera a cada rodada
         for pid in self.pids.values():
             if pid.name == "baro": continue # pula o barometro q ja foi lido
             msg = pid.build_request()
@@ -112,18 +112,21 @@ class ObdReader :
 
         # 2. Para cada PID, a hora a partir da qual ele pode ser pedido de novo.
         #    Começa em 0.0, ou seja, todos podem ser pedidos já na primeira rodada.
-            next_request = {}
-            for pid in self.pids.values():
-                next_request[pid.name] = 0.0
+        next_request = {}
+        for pid in self.pids.values():
+            next_request[pid.name] = 0.0
 
         # 3. Laço principal: cada volta é uma "rodada" por todos os PIDs.
         while True:
             if stop_at is not None and time.time() >= stop_at:
                 break
+            
+            sent_any = False                # zera a cada rodada
 
             for pid in self.pids.values():
-                now = time.time()
                 
+                if pid.name == "baro": continue   # baro é lido só uma vez
+                now = time.time()
                 # 3a. Ainda não é hora deste PID: pula para o próximo.
                 if now < next_request[pid.name]:
                     continue
@@ -162,8 +165,8 @@ class ObdReader :
         periódicos (start), escuta as respostas (escutar), e garante que os
         envios periódicos param no final (stop)
         '''
-        self.start()
+        self.self.read_pid_only(self.pids["baro"])   # sem start(): listen_sequential já envia os pedidos
         try:
-            self.listen_sequential(duracao_segundos=duracao_segundos, funcao=funcao)
+            self.listen_sequential(duration=duracao_segundos, funcao=funcao)
         finally:
             self.stop()
