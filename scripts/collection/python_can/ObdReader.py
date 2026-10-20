@@ -150,7 +150,7 @@ class ObdReader :
 
                     value = pid.decode_response(msg)
                     if value is not None:       # None = frame from another PID, ignore
-                        funcao(pid, value, frame.timestamp)
+                        funcao(pid, value, msg.timestamp)
                         got_reply = True
 
             if not sent_any:
