@@ -4,6 +4,7 @@ import time
 
 class DataCollect:
 
+    
     def __init__(self, nome, pids, pids_ancora):
         """
         nome:
@@ -32,15 +33,21 @@ class DataCollect:
         #Set que guarda quais valores já foram recebidos
         self.PIDS_RECEIVED = set()
 
+        #usa na funcao nova
+        self.ligado = False
+        self.sessao = 0
+        self.t0 = None
+        self.parado_desde = None
+        self.PIDS_RECEIVED = set()
+
+        #funcao antiga
         self.pids_ancora = set(pids_ancora) #pids que vai de 50 em 50ms
         self.recebidos_ancora = set()
-
         self.pronto = False #ja coletou a primeira linha? 1x cada dado?
-
         self.time_inicio = time.time()
-
         self.timeout_aquecimento = 2.0 #segundos
         self.motor_ligado = False
+
 
     def criar_CSV(self) -> None:
 
@@ -54,6 +61,42 @@ class DataCollect:
                     list(self.pids.keys()) + ["timestamp"] #escreve o cabeçalho se for novo
                 )
 
+    def record_reading(self, pid, valor, timestamp) -> None:
+
+        if pid.name not in self.pids:
+            return
+        self.PIDS_RECEIVED.add(pid.name)
+
+        if pid.name == "rpm":
+            self._estado_motor(valor, timestamp)
+
+        if not self.ligado:
+            return                          # antes da partida: não grava
+
+        with open(self.nome, "a", newline="") as arq:
+            csv.writer(arq).writerow(
+                [round((timestamp - self.t0) * 1000), pid.name, valor, self.sessao]
+            )
+
+    def _estado_motor(self, rpm, timestamp):
+
+        if not self.ligado:
+            if rpm >= self.500:      # motor pegou: tempo zera
+                self.ligado = True
+                self.sessao += 1
+                self.t0 = timestamp
+                self.parado_desde = None
+                print(f"Motor ligado. Sessão {self.sessao}")
+
+        elif rpm < 50:
+            if self.parado_desde is None:
+                self.parado_desde = timestamp
+            elif timestamp - self.parado_desde >= 3.0:
+                self.ligado = False
+                print("Motor desligado.")
+        else:
+            self.parado_desde = None  
+              
     def receber_dado(self, pid, valor, timestamp) -> None:
         """
         essencialmente a função callback de obdReader que recebe dados lidos por ela

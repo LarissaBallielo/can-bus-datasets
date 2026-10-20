@@ -18,7 +18,7 @@ def main():
 
     # Cria o objeto responsável pelo CSV
     coletor = DataCollect(
-        "/home/canlab/can-bus-datasets/data/dataset.csv",
+        "/home/canlab/can-bus-datasets/data/eventos.csv",
         pids,
         pids_ancora
     )
@@ -34,7 +34,7 @@ def main():
 
         try:
             # Passa a função do DataCollect como callback.
-            reader.read_all( funcao=coletor.receber_dado)
+            reader.read_all( funcao=coletor.record_reading)
 
         except KeyboardInterrupt:
             print("Encerrado.")

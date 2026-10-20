@@ -57,7 +57,7 @@ class Pid:
         resposta = False
 
         #mensagens com menos de 3 bytes : inválidas, só ruído
-        if len(msg.data) < 3: return None
+        if len(msg.data) < 3 + self.num_bytes: return None
 
         #confirma que a mensagem veio de um dos IDs de resposta do OBD2
         for id in self.listaIds :

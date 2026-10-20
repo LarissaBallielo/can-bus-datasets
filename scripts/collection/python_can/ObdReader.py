@@ -104,7 +104,58 @@ class ObdReader :
             valor = pid.decode_response(msg)
             if valor is not None:
                 funcao(pid, valor, msg.timestamp)
+    
 
+    def listen_sequential(self, duration=None, funcao=print, max_wait=0.05):
+    # 1. Quando parar. Sem duração, roda até o Ctrl+C.
+    stop_at = time.time() + duration if duration else None
+
+    # 2. Para cada PID, a hora a partir da qual ele pode ser pedido de novo.
+    #    Começa em 0.0, ou seja, todos podem ser pedidos já na primeira rodada.
+        next_request = {}
+        for pid in self.pids.values():
+            next_request[pid.name] = 0.0
+
+    # 3. Laço principal: cada volta é uma "rodada" por todos os PIDs.
+    while True:
+        if stop_at is not None and time.time() >= stop_at:
+            break
+
+        for pid in self.pids.values():
+            now = time.time()
+            
+            # 3a. Ainda não é hora deste PID: pula para o próximo.
+            if now < next_request[pid.name]:
+                continue
+
+            # 3b. É a hora: marca quando ele poderá ser pedido de novo.
+            next_request[pid.name] = now + pid.periodo_ms / 1000
+
+            # 3c. Manda o pedido deste PID. 
+            self.bus.send(pid.build_request())
+            sent_any = True
+
+            # 3d. Espera a resposta, por no máximo 'max_wait' segundos.
+            deadline = time.time() + max_wait
+            got_reply = False
+
+
+            while not got_reply and time.time() < deadline:
+                time_to_finish = deadline - time.time()
+                if time_to_finish <= 0:
+                    break
+                msg = self.bus.recv(timeout=max(0.0, deadline - time.time()))
+                if msg is None:
+                    break
+
+                value = pid.decode_response(msg)
+                if value is not None:       # None = frame from another PID, ignore
+                    funcao(pid, value, frame.timestamp)
+                    got_reply = True
+
+        if not sent_any:
+            time.sleep(0.005)               # nothing due: avoid busy-waiting
+        
     def read_all(self, duracao_segundos=None, funcao=print):
         '''
         junta o ciclo completo numa chamada ,  começa os envios
@@ -113,6 +164,6 @@ class ObdReader :
         '''
         self.start()
         try:
-            self.escutar(duracao_segundos=duracao_segundos, funcao=funcao)
+            self.listen_sequential(duracao_segundos=duracao_segundos, funcao=funcao)
         finally:
             self.stop()
