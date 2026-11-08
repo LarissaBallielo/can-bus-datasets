@@ -9,12 +9,6 @@ def main():
 
     # Carrega os PIDs do pid.csv em um dicionario
     pids = ler_pids("pid.csv")
-    pids_ancora = set()
-
-    #vê os PIDs que tem o periodo de 50ms e põe na lista pids_ancora
-    for pid in pids.values():
-        if(pid.periodo_ms == 50):
-            pids_ancora.add(pid.name)
 
     #nome arquivo (carro_data_flag)
     nome = input("carro: ")
