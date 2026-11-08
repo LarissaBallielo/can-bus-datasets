@@ -58,12 +58,16 @@ class DataCollect:
 
         #faz 3s que nn recebe rpm? chave da ignição desligada 
         if (self.ligado and self.ultimo_rpm is not None and timestamp - self.ultimo_rpm >= 3.0):
+            self.ligado = False
+            print("Motor desligado (chave desligada).")
 
         if pid.name == "rpm":
             self.ultimo_rpm = timestamp
             self._estado_motor(valor, timestamp) #manda pro estado motor p saber se o motor está ligado ou desligado.
+            if valor > 10000: #leitura invalida
+                return
 
-        #so grava c motor ligado
+        #so grava com motor ligado
         if not self.ligado:
             return
 
@@ -95,7 +99,7 @@ class DataCollect:
             #rpm tá abaixo de 50rpm faz 1s -> motor desligado, morreu
             elif timestamp - self.parado_desde >= 1.0:
                 self.ligado = False
-                print("Motor desligado.")
+                print("Motor desligado(morreu)")
         
         #carro ligado, para a contagem
         else:
