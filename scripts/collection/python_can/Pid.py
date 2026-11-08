@@ -14,12 +14,12 @@ class Pid:
     def __init__(self, code, name, num_bytes, scale, offset, unit, periodo_ms, byte_inicio, valor_invalido): # está passando muito pouco argumentos vai dar erro
         self.code = code # código do PID em hexadecimal
         self.name = name
-        self.num_bytes = num_bytes #quantos bytes de dado a resposta desse PID traz
+        self.num_bytes = int(num_bytes) #quantos bytes de dado a resposta desse PID traz
         self.scale = scale  # multiplicador aplicado no valor bruto
         self.offset = offset # valor somado depois da escala
         self.unit = unit # unidade(km/h, s, rpm..)
         self.periodo_ms = periodo_ms # tempo em milissegundos o qual esse PID deve ser solicitado de novo (frequencia)
-        self.byte_inicio = byte_inicio
+        self.byte_inicio =int(byte_inicio)
         self.valor_invalido = valor_invalido
         self.listaIds = [0x7E8, 0x7E9, 0x7EA, 0x7EB, 0x7EC, 0x7ED, 0x7EE, 0x7EF] #lista de IDs de possiveis respostas ao OBD2, variam conforme a ECU
 
@@ -50,36 +50,42 @@ class Pid:
 
     #verifica primeiro se é uma resposta ao obd2(pelo ID) e 
     #se é do PID certo, aí pega os dados
-    def decode_response(self, msg:Message):
-        '''
-        Confere se msg é uma resposta válida a este PID, e se for, devolve
-        o valor já decodificado (float). Devolve None em qualquer caso de
-        falha
-        '''
+    def decode_response(self, msg: Message):
         resposta = False
 
-        #mensagens com menos de 3 bytes : inválidas, só ruído
-        if len(msg.data) < 3 + self.byte_inicio + self.num_bytes: return None
+        # Mensagens com tamanho insuficiente
+        if len(msg.data) < 3 + self.byte_inicio + self.num_bytes:
+            return None
 
-        #confirma que a mensagem veio de um dos IDs de resposta do OBD2
-        for id in self.listaIds :
-            if (msg.arbitration_id == id):
+        # Confirma o ID de resposta
+        for id in self.listaIds:
+            if msg.arbitration_id == id:
                 resposta = True
-        if resposta == False : return None
 
-        #confirma que é uma resposta ao modo 01 (0x41 = 0x01 + 0x40)
-        if not (msg.data[1] == 0x41): return None
+        if not resposta:
+            return None
 
-        #confirma que é resposta a esse PID específico
+        # Confirma resposta ao modo 01
+        if msg.data[1] != 0x41:
+            return None
+
+        # Confirma o PID
         if msg.data[2] != self.code:
             return None
 
-        recebidos = msg.data[0] - 2          # bytes de dado que a ECU mandou
+        # Quantidade de bytes de dados informada na mensagem
+        recebidos = msg.data[0] - 2
 
-        if recebidos < self.byte_inicio + self.num_bytes:      # tamanho inesperado: descarta
+        if recebidos < self.byte_inicio + self.num_bytes:
             return None
-        
-       dados = msg.data[inicio:inicio +self.num_bytes]
-       if int.from_bytes(dados, "big") == self.valor_invalido: return None  # NaN nunca é igual
-       return self.formula(dados)
 
+        # Extrai os bytes do parâmetro
+        inicio = 3 + self.byte_inicio
+        fim = inicio + self.num_bytes
+        dados = msg.data[inicio:fim]
+
+        # Verifica se o valor é inválido
+        if int.from_bytes(dados, byteorder="big") == self.valor_invalido:
+            return None
+
+        return self.formula(dados)

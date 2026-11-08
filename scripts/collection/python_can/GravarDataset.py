@@ -58,7 +58,7 @@ class DataCollect:
 
             if novo:
                 writer.writerow(
-+                     ["t_ms", "pid", "valor", "sessao"] #cabeçalho do formato longo
+                     ["t_ms", "pid", "valor", "sessao"] #cabeçalho do formato longo
                 )
 
     def record_reading(self, pid, valor, timestamp) -> None:
@@ -67,21 +67,17 @@ class DataCollect:
             return
         self.PIDS_RECEIVED.add(pid.name)
 
-        if self.ligado and timestamp - self.ultimo_rpm >= 3.0:
-            self.ligado = False
-            print("Motor desligado (sem resposta de RPM).")
-     
-        if pid.name == "rpm":
-            self.ultimo_rpm = timestamp
-            self._estado_motor(valor, timestamp)
+        # Guarda o timestamp inicial da coleta
+        if self.t0 is None:
+            self.t0 = timestamp
 
-        if not self.ligado:
-            return                          # antes da partida: não grava
-
+        # Grava todos os PIDs recebidos, mesmo com o carro parado
         with open(self.nome, "a", newline="") as arq:
-            csv.writer(arq).writerow(
-                [round((timestamp - self.t0) * 1000), pid.name, valor, self.sessao]
-            )
+            csv.writer(arq).writerow([ round((timestamp - self.t0) * 1000), pid.name, valor, self.sessao ])
+            arq.flush()
+
+        # Mostra cada leitura no terminal
+        print( f"t={round((timestamp - self.t0) * 1000)} ms | " f"PID={pid.name} | valor={valor}", flush=True)
 
     def _estado_motor(self, rpm, timestamp):
 

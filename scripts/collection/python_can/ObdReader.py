@@ -155,7 +155,6 @@ class ObdReader :
                     if value is not None:       # None = frame from another PID, ignore
                         funcao(pid, value, msg.timestamp)
                         got_reply = True
-
             if not sent_any:
                 time.sleep(0.005)               # nothing due: avoid busy-waiting
             
@@ -165,7 +164,7 @@ class ObdReader :
         periódicos (start), escuta as respostas (escutar), e garante que os
         envios periódicos param no final (stop)
         '''
-        self.self.read_pid_only(self.pids["baro"])   # sem start(): listen_sequential já envia os pedidos
+        self.read_pid_only(self.pids["baro"])   # sem start(): listen_sequential já envia os pedidos
         try:
             self.listen_sequential(duration=duracao_segundos, funcao=funcao)
         finally:

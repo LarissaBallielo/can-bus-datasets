@@ -19,8 +19,11 @@ def ler_pids(arquivo: str):
     df = pd.read_csv(arquivo)
 
     #converte a coluna code para hexadecimal
-    df["code"] = df["code"].apply(lambda x: int(x, 16))
+    df = df.dropna(subset=["code"]).copy()
 
+    df["code"] = df["code"].apply(
+    	lambda x: int(str(x).strip(), 16)
+    )
     # Transforma o DataFrame inteiro numa lista de dicionários, um por
     # linha da tabela: [{"code": 12, "name": "rpm", ...}, {...}, ...]
     linhas = df.to_dict("records")
