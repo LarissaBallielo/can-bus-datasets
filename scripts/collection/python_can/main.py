@@ -12,10 +12,11 @@ def main():
 
     #nome arquivo (carro_data_flag)
     nome = input("carro: ")
-    data = input("data: ")
+    data = input("data(dia-mes-ano): ")
+    hora = input("hora(hora-min): ")
     flag = input("flag(0-sem falha/1-com falha): ")
 
-    caminho = f"/home/canlab/can-bus-datasets/data/collected/{nome}_{data}_{flag}"
+    caminho = f"/home/canlab/can-bus-datasets/data/collected/{nome}_{data}_{hora}_{flag}"
 
     # Cria o objeto responsável pelo CSV
     coletor = DataCollect( caminho, pids, flag )
