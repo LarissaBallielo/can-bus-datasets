@@ -62,10 +62,11 @@ class DataCollect:
             print("Motor desligado (chave desligada).")
 
         if pid.name == "rpm":
+            if valor > 10000:
+                return
             self.ultimo_rpm = timestamp
             self._estado_motor(valor, timestamp) #manda pro estado motor p saber se o motor está ligado ou desligado.
-            if valor > 10000: #leitura invalida
-                return
+            
 
         #so grava com motor ligado
         if not self.ligado:
