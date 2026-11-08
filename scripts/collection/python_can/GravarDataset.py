@@ -5,7 +5,7 @@ import time
 class DataCollect:
 
     
-    def __init__(self, nome, pids, pids_ancora):
+    def __init__(self, caminho, pids, flag):
         """
         nome:
             Nome do arquivo CSV.
@@ -14,7 +14,7 @@ class DataCollect:
             Dicionário de Pid retornado por ler_pids().
         """
 
-        self.nome = nome
+        self.caminho = caminho
 
         # PIDs que são consideraos para leitura,
         # como o Baro é enviado só uma vez ele desconsidera a sua leitura pro buffer
@@ -35,7 +35,7 @@ class DataCollect:
 
         #usa na funcao nova
         self.ligado = False
-        self.sessao = 0
+        self.flag = flag
         self.t0 = None
         self.parado_desde = None
         self.PIDS_RECEIVED = set()
@@ -51,14 +51,14 @@ class DataCollect:
 
     def criar_CSV(self) -> None:
 
-        novo = not os.path.exists(self.nome)
+        novo = not os.path.exists(self.caminho)
 
-        with open(self.nome, "a", newline="") as arquivo:
+        with open(self.caminho, "a", newline="") as arquivo:
             writer = csv.writer(arquivo)
 
             if novo:
                 writer.writerow(
-                     ["t_ms", "pid", "valor", "sessao"] #cabeçalho do formato longo
+                     ["t_ms", "pid", "valor", "flag"] #cabeçalho do formato longo
                 )
 
     def record_reading(self, pid, valor, timestamp) -> None:
@@ -73,7 +73,7 @@ class DataCollect:
 
         # Grava todos os PIDs recebidos, mesmo com o carro parado
         with open(self.nome, "a", newline="") as arq:
-            csv.writer(arq).writerow([ round((timestamp - self.t0) * 1000), pid.name, valor, self.sessao ])
+            csv.writer(arq).writerow([ round((timestamp - self.t0) * 1000), pid.name, valor, self.flag ])
             arq.flush()
 
         # Mostra cada leitura no terminal
@@ -84,10 +84,8 @@ class DataCollect:
         if not self.ligado:
             if rpm >= 500:      # motor pegou: tempo zera
                 self.ligado = True
-                self.sessao += 1
                 self.t0 = timestamp
                 self.parado_desde = None
-                print(f"Motor ligado. Sessão {self.sessao}")
 
         elif rpm < 50:
             if self.parado_desde is None:
@@ -97,6 +95,11 @@ class DataCollect:
                 print("Motor desligado.")
         else:
             self.parado_desde = None  
+
+
+
+##############  nao estou usando
+
 
     def receber_dado(self, pid, valor, timestamp) -> None:
         """
