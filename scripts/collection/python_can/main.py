@@ -16,7 +16,7 @@ def main():
     hora = input("hora(hora-min): ")
     flag = input("flag(0-sem falha/1-com falha): ")
 
-    caminho = f"/home/canlab/can-bus-datasets/data/collected/{nome}_{data}_{hora}_{flag}"
+    caminho = f"/home/canlab/can-bus-datasets/data/collected/{nome}_{data}_{hora}_{flag}.csv"
 
     # Cria o objeto responsável pelo CSV
     coletor = DataCollect( caminho, pids, flag )
@@ -27,7 +27,7 @@ def main():
 
 
     #can0 para mcp2515 e can1 para canable
-    with can.Bus( channel="can0", interface="socketcan" ) as bus:
+    with can.Bus( channel="can1", interface="socketcan" ) as bus:
 
         reader = ObdReader(bus,pids)
 
